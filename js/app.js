@@ -152,17 +152,36 @@
     renderPanel();
   }));
 
+  const KID = {
+    Temperature: { i: '🌡️', w: 'Hot days' }, Humidity: { i: '💦', w: 'Wet air' }, Wind: { i: '🌬️', w: 'Wind' },
+    Rainfall: { i: '🌧️', w: 'Rain' }, Road: { i: '🛣️', w: 'Roads' }, River: { i: '💧', w: 'Rivers' },
+    Irrigation: { i: '🚿', w: 'Farm canals' }, Elevation: { i: '⛰️', w: 'Mountains' }
+  };
+  function kidSentence(v, c) {
+    const what = state.model === 'model1' ? 'got sicker' : 'got sick more often';
+    if (v === 'Road') return c > 0 ? `Farms <b>far from roads</b> ${what}` : `Farms <b>near roads</b> ${what}`;
+    if (v === 'River') return c < 0 ? `Farms <b>near rivers</b> ${what}` : `Farms <b>far from rivers</b> ${what}`;
+    if (v === 'Irrigation') return c < 0 ? `Farms <b>near farm canals</b> ${what}` : `Farms <b>far from farm canals</b> ${what}`;
+    if (v === 'Elevation') return c < 0 ? `Farms <b>low down</b> ${what}` : `Farms <b>up high</b> ${what}`;
+    return `<b>${KID[v].w}</b> changes how ${state.model === 'model1' ? 'sick trees get' : 'often trees get sick'}`;
+  }
   function renderPanel() {
     const m = R[state.model];
-    document.getElementById('mTitle').textContent = state.model === 'model1' ? 'Model 1 · Severity' : 'Model 2 · Frequency';
-    document.getElementById('mSub').textContent = state.model === 'model1'
-      ? 'Dependent: % of area affected by E. carotovora' : 'Dependent: number of disease cases';
+    document.getElementById('mTitle').textContent = state.model === 'model1' ? '🤒 How bad is it?' : '🔁 How often does it happen?';
+    document.getElementById('mSub').innerHTML = state.model === 'model1'
+      ? 'Tall towers = farms where <b>lots of trees</b> are sick.' : 'Tall towers = farms that got sick <b>many times</b>.';
+    const sig = [], ns = [];
+    R.variables.forEach((v, i) => (m.p[i] < 0.05 ? sig : ns).push([v, m.coef[i]]));
+    document.getElementById('findings').innerHTML = sig.length
+      ? sig.map(([v, c]) => `<div class="find"><span>${KID[v].i}</span><p>${kidSentence(v, c)}</p></div>`).join('')
+      : '<p class="notmatter">Nothing clearly mattered.</p>';
+    document.getElementById('notMatter').innerHTML = ns.map(([v]) => `<span class="chip">${KID[v].i} ${KID[v].w}</span>`).join('');
+
     const maxAbs = Math.max(...m.coef.map(Math.abs));
     document.getElementById('bars').innerHTML = R.variables.map((v, i) => {
       const c = m.coef[i], p = m.p[i], w = Math.abs(c) / maxAbs * 50;
-      const sig = p < 0.05;
       const style = c >= 0 ? `left:50%;width:${w}%` : `left:${50 - w}%;width:${w}%`;
-      return `<div class="bar ${sig ? 'sig' : ''} ${c < 0 ? 'neg' : ''}" title="coef ${fmt(c, 4)} · VIF ${fmt(R.vif[i], 2)}">
+      return `<div class="bar ${p < 0.05 ? 'sig' : ''} ${c < 0 ? 'neg' : ''}" title="coef ${fmt(c, 4)} · VIF ${fmt(R.vif[i], 2)}">
         <span class="nm">${v}</span><span class="track"><span class="fill" style="${style}"></span></span>
         <span class="pv">p ${pStr(p)}</span></div>`;
     }).join('');
@@ -189,8 +208,7 @@
     if (!state.points) return;
     const f = state.points.features.filter(x => state.year === 'all' || x.properties.year === state.year).map(x => x.properties);
     const avg = f.length ? f.reduce((s, p) => s + p.severity_pct, 0) / f.length : 0;
-    const tot = f.reduce((s, p) => s + p.frequency, 0);
-    count('sCases', f.length); count('sFreq', tot); count('sMun', new Set(f.map(p => p.municipality)).size);
+    count('sCases', f.length); count('sMun', new Set(f.map(p => p.municipality)).size);
     document.getElementById('sSev').textContent = `${avg.toFixed(1)}%`;
   }
   function count(id, to) {
@@ -204,21 +222,21 @@
     const show = e => {
       const p = e.features[0].properties;
       const hp = Math.min(100, p.severity_pct / 60 * 100);
-      new gl.Popup({ offset: 12, maxWidth: '260px' }).setLngLat(e.lngLat).setHTML(`
-        <div class="card-h"><b>${p.id}</b><small>${p.municipality} · ${p.year}</small></div>
+      const km = m => m >= 1000 ? `${(m / 1000).toFixed(1)} km` : `${m} m`;
+      const face = p.severity_pct >= 28 ? '😷' : p.severity_pct >= 15 ? '🤒' : '🙂';
+      new gl.Popup({ offset: 12, maxWidth: '280px' }).setLngLat(e.lngLat).setHTML(`
+        <div class="card-h"><b>${face} Farm in ${p.municipality}</b><small>Year ${p.year} · ${p.id}</small></div>
         <div class="card-b">
-          <div style="grid-column:1/-1"><span>Severity (area affected)</span><b>${p.severity_pct}%</b></div>
+          <div class="kid" style="grid-column:1/-1"><span>How many trees are sick?</span><b>${p.severity_pct}% of the farm</b></div>
           <div class="card-hp"><i style="width:${hp}%"></i></div>
-          <div><span>Cases</span><b>${p.frequency}</b></div>
-          <div><span>Elevation</span><b>${p.elev_m} m</b></div>
-          <div><span>To road</span><b>${(+p.dist_road_m).toLocaleString()} m</b></div>
-          <div><span>To river</span><b>${(+p.dist_river_m).toLocaleString()} m</b></div>
-          <div><span>To irrigation</span><b>${(+p.dist_irrig_m).toLocaleString()} m</b></div>
-          <div><span>Rainfall</span><b>${p.rain_mm} mm</b></div>
-          <div><span>Max temp</span><b>${p.tmax_c} °C</b></div>
-          <div><span>Humidity</span><b>${p.rh_pct}%</b></div>
-          <div><span>Wind</span><b>${p.wind_ms} m/s</b></div>
-          <div class="card-note">Sample record · distances &amp; elevation measured in QGIS</div>
+          <div class="kid" style="grid-column:1/-1"><span>How many times did it get sick?</span><b>${p.frequency} ${p.frequency == 1 ? 'time' : 'times'}</b></div>
+          <div class="kid"><span>💧 River</span><b>${km(+p.dist_river_m)} away</b></div>
+          <div class="kid"><span>🚿 Farm canal</span><b>${km(+p.dist_irrig_m)} away</b></div>
+          <div class="kid"><span>🛣️ Road</span><b>${km(+p.dist_road_m)} away</b></div>
+          <div class="kid"><span>⛰️ Height</span><b>${p.elev_m} m up</b></div>
+          <div class="kid"><span>🌧️ Rain / year</span><b>${p.rain_mm} mm</b></div>
+          <div class="kid"><span>🌡️ Hottest</span><b>${p.tmax_c} °C</b></div>
+          <div class="card-note">Practice data · not a real farm</div>
         </div>`).addTo(map);
     };
     ['towers', 'pts-base'].forEach(id => {
@@ -245,7 +263,10 @@
   bSpin.addEventListener('click', () => { state.spin = !state.spin; bSpin.classList.toggle('on', state.spin); if (state.spin) orbit(); });
   function orbit() { if (!state.spin) return; map.easeTo({ bearing: map.getBearing() + 12, duration: 1000, easing: t => t }); setTimeout(orbit, 1000); }
   map.on('mousedown', () => { if (state.spin) { state.spin = false; bSpin.classList.remove('on'); } });
-  document.getElementById('btnNorth').addEventListener('click', () => map.easeTo({ bearing: 0, duration: 800 }));
+  const welcome = document.getElementById('welcome');
+  try { if (localStorage.getItem('seenWelcome')) welcome.hidden = true; } catch (e) {}
+  document.getElementById('closeWelcome').addEventListener('click', () => { welcome.hidden = true; try { localStorage.setItem('seenWelcome', '1'); } catch (e) {} });
+  document.getElementById('btnHelp').addEventListener('click', () => welcome.hidden = false);
   document.getElementById('btnHome').addEventListener('click', () => map.flyTo({ ...HOME, pitch: state.is3d ? HOME.pitch : 0, duration: 1600 }));
 
   // ---------- panel / modal ----------

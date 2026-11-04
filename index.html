@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>Nangka Guard · North Cotabato</title>
-<meta name="description" content="Sample 3D web map: jackfruit dieback (E. carotovora) and abiotic factors in North Cotabato, built from QGIS layers.">
+<title>Sick Jackfruit Map · North Cotabato</title>
+<meta name="description" content="A simple 3D map of where jackfruit trees get sick in North Cotabato, built from QGIS layers.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
 <link href="css/style.css" rel="stylesheet">
@@ -16,49 +16,59 @@
 <!-- TOP BAR -->
 <header class="topbar">
   <div class="crest">
-    <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 3 42 11v13c0 11-8 18-18 21C14 42 6 35 6 24V11z" fill="url(#g1)" stroke="#f3d27a" stroke-width="2"/><path d="M24 12c-6 6-7 13-2 20 1-5 3-8 8-11-3 1-5 2-6 4 0-5 1-9 0-13z" fill="#0b1a2b"/><defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3ee0c4"/><stop offset="1" stop-color="#127a6b"/></linearGradient></defs></svg>
+    <span class="crest-icon" aria-hidden="true">🌳</span>
     <div>
-      <h1>NANGKA GUARD</h1>
-      <p>Jackfruit Dieback · North Cotabato</p>
+      <h1>SICK JACKFRUIT MAP</h1>
+      <p>Where do jackfruit trees get sick in North Cotabato?</p>
     </div>
   </div>
   <div class="scoreboard">
-    <div class="score"><b id="sCases">0</b><span>Reports</span></div>
-    <div class="score gold"><b id="sSev">0%</b><span>Avg severity</span></div>
-    <div class="score red"><b id="sFreq">0</b><span>Total cases</span></div>
-    <div class="score"><b id="sMun">0</b><span>Towns hit</span></div>
+    <div class="score"><i>🌳</i><b id="sCases">0</b><span>sick farms</span></div>
+    <div class="score gold"><i>🤒</i><b id="sSev">0%</b><span>of trees sick</span></div>
+    <div class="score"><i>🏘️</i><b id="sMun">0</b><span>towns</span></div>
   </div>
-  <div class="modeswitch" role="tablist" aria-label="Choose model">
-    <button class="mode active" data-model="model1" role="tab">M1 · Severity</button>
-    <button class="mode" data-model="model2" role="tab">M2 · Frequency</button>
+  <div class="modeswitch" role="tablist" aria-label="What do the towers show?">
+    <button class="mode active" data-model="model1" role="tab"><i>🤒</i> How bad?</button>
+    <button class="mode" data-model="model2" role="tab"><i>🔁</i> How often?</button>
   </div>
 </header>
 
-<div class="sample-badge" title="Disease points and climate values are placeholders generated in QGIS for layout only.">SAMPLE DATA</div>
+<div class="sample-badge" title="The farms and weather numbers are made up for now.">PRACTICE DATA · NOT REAL YET</div>
 
-<!-- LEFT SKILL RAIL (layer toggles) -->
-<nav class="skills" aria-label="Layers">
-  <button class="skill on" data-layer="hotspot"><i>🔥</i><span>Hotspot</span></button>
-  <button class="skill on" data-layer="towers"><i>⬢</i><span>Cases 3D</span></button>
-  <button class="skill on" data-layer="rivers"><i>〰</i><span>Rivers</span></button>
-  <button class="skill on" data-layer="irrigation"><i>⫶</i><span>Irrigation</span></button>
-  <button class="skill on" data-layer="roads"><i>⟋</i><span>Roads</span></button>
-  <button class="skill" data-layer="elevation"><i>▲</i><span>Elevation</span></button>
-  <button class="skill on" data-layer="munis"><i>⬚</i><span>Towns</span></button>
+<!-- LEFT: layer buttons -->
+<nav class="skills" aria-label="Show or hide">
+  <button class="skill on" data-layer="hotspot"><i>🔥</i><span>Worst spots</span></button>
+  <button class="skill on" data-layer="towers"><i>🌳</i><span>Sick farms</span></button>
+  <button class="skill on" data-layer="rivers"><i>💧</i><span>Rivers</span></button>
+  <button class="skill on" data-layer="irrigation"><i>🚿</i><span>Farm canals</span></button>
+  <button class="skill on" data-layer="roads"><i>🛣️</i><span>Roads</span></button>
+  <button class="skill" data-layer="elevation"><i>⛰️</i><span>Mountains</span></button>
+  <button class="skill on" data-layer="munis"><i>🏘️</i><span>Towns</span></button>
 </nav>
 
-<!-- RIGHT STATS PANEL -->
+<!-- RIGHT: simple answer panel -->
 <aside class="panel" id="panel">
-  <button class="panel-toggle" id="panelToggle" aria-label="Collapse panel">◀</button>
+  <button class="panel-toggle" id="panelToggle" aria-label="Hide panel">◀</button>
   <div class="panel-inner">
     <div class="panel-head">
-      <h2 id="mTitle">Model 1 · Severity</h2>
-      <p id="mSub">Dependent: % of area affected</p>
+      <h2 id="mTitle">What makes trees sick?</h2>
+      <p id="mSub">Tall red towers = farms where many trees are sick.</p>
     </div>
-    <div class="attr-legend"><span class="dot sig"></span>significant (p &lt; 0.05) <span class="dot ns"></span>not significant</div>
-    <div id="bars" class="bars"></div>
-    <div class="diag">
-      <h3>Diagnostics</h3>
+
+    <div class="legend">
+      <div class="legend-bar"></div>
+      <div class="legend-lbl"><span>🙂 a little sick</span><span>😷 very sick</span></div>
+      <div class="legend-tower"><span class="t s"></span><span class="t m"></span><span class="t l"></span><b>Taller tower = worse</b></div>
+    </div>
+
+    <h3 class="sec">✅ These matter</h3>
+    <div id="findings" class="findings"></div>
+    <h3 class="sec muted">🤷 These didn't matter much</h3>
+    <p id="notMatter" class="notmatter"></p>
+
+    <details class="grown">
+      <summary>📊 For grown-ups: the statistics</summary>
+      <div id="bars" class="bars"></div>
       <div class="diag-grid">
         <div><b id="dR2"></b><span>Multiple R²</span></div>
         <div><b id="dAR2"></b><span>Adjusted R²</span></div>
@@ -68,58 +78,69 @@
         <div><b>ln + box plot</b><span>Transform / outliers</span></div>
       </div>
       <p class="src" id="src"></p>
-    </div>
-    <button class="btn-methods" id="openMethods">How the analysis works</button>
+      <button class="btn-methods" id="openMethods">How the study works</button>
+    </details>
   </div>
 </aside>
 
-<!-- BOTTOM: camera controls -->
+<!-- BOTTOM LEFT: camera -->
 <div class="camera">
-  <button id="btn3d" class="cam on" title="Toggle 3D terrain">3D</button>
-  <button id="btnSpin" class="cam" title="Orbit">⟳</button>
-  <button id="btnNorth" class="cam" title="Face north">N</button>
-  <button id="btnHome" class="cam" title="Reset view">⌂</button>
+  <button id="btn3d" class="cam on" title="3D on/off"><b>3D</b><span>tilt</span></button>
+  <button id="btnSpin" class="cam" title="Spin around"><b>⟳</b><span>spin</span></button>
+  <button id="btnHome" class="cam" title="Go back to start"><b>⌂</b><span>start</span></button>
+  <button id="btnHelp" class="cam" title="How to use"><b>?</b><span>help</span></button>
 </div>
 
-<!-- BOTTOM: timeline -->
+<!-- BOTTOM: year -->
 <div class="timeline">
-  <div class="tl-head"><span>MATCH TIMELINE</span><b id="tlLabel">ALL YEARS</b></div>
-  <input type="range" id="year" min="2018" max="2025" step="1" value="2018" aria-label="Filter by year">
+  <div class="tl-head"><span>📅 PICK A YEAR</span><b id="tlLabel">ALL YEARS</b></div>
+  <input type="range" id="year" min="2018" max="2025" step="1" value="2018" aria-label="Pick a year">
   <div class="tl-ticks"><span>ALL</span><span>2019</span><span>2020</span><span>2021</span><span>2022</span><span>2023</span><span>2024</span><span>2025</span></div>
 </div>
 
 <!-- BOTTOM RIGHT: minimap -->
-<div class="minimap-wrap"><div id="minimap"></div><span>MINIMAP</span></div>
+<div class="minimap-wrap"><div id="minimap"></div><span>YOU ARE HERE</span></div>
 
-<!-- METHODS MODAL -->
+<!-- WELCOME -->
+<div class="modal" id="welcome">
+  <div class="modal-card welcome">
+    <h2>👋 Welcome!</h2>
+    <p class="big">This map shows where <b>jackfruit trees get sick</b> from a germ called <i>E. carotovora</i>.</p>
+    <ol class="steps">
+      <li><span>🌳</span><div><b>Look at the towers.</b> Each tower is a farm with sick trees. <b>Tall and red</b> means very sick.</div></li>
+      <li><span>👆</span><div><b>Tap a tower</b> to see that farm's story.</div></li>
+      <li><span>🔁</span><div><b>Switch</b> between <b>How bad?</b> and <b>How often?</b> at the top.</div></li>
+    </ol>
+    <button class="go" id="closeWelcome">Let's go! ▶</button>
+  </div>
+</div>
+
+<!-- METHODS (grown-ups) -->
 <div class="modal" id="methods" hidden>
   <div class="modal-card">
     <button class="modal-x" id="closeMethods" aria-label="Close">✕</button>
-    <h2>How the analysis works</h2>
+    <h2>How the study works</h2>
     <p><b>Two OLS models</b> share eight explanatory variables: maximum temperature, relative humidity, wind speed, rainfall, distance to road, distance to river, distance to irrigation, and elevation.</p>
     <ul>
-      <li><b>Model 1:</b> percentage of area affected by <i>E. carotovora</i> (severity).</li>
-      <li><b>Model 2:</b> frequency of disease incidence (number of cases).</li>
+      <li><b>Model 1 (How bad?):</b> percentage of area affected by <i>E. carotovora</i> (severity).</li>
+      <li><b>Model 2 (How often?):</b> frequency of disease incidence (number of cases).</li>
     </ul>
     <p>Data were natural-log (ln) transformed in SPSS, and outliers were removed using box plots.</p>
     <h3>Supporting methods</h3>
     <ul>
-      <li><b>Kernel density</b>: hotspot map of where cases concentrate (mapping step, not part of the regression).</li>
+      <li><b>Kernel density</b>: hotspot map ("worst spots"). Mapping only, not part of the regression.</li>
       <li><b>Near tool</b>: distance from each record to the nearest road, river, irrigation line and elevation contour.</li>
-      <li><b>Moran's I</b>: checks if variables are clustered or random. Distance to road and elevation first showed clustering.</li>
-      <li><b>R² / Adjusted R²</b>: model fit.</li>
-      <li><b>VIF</b>: redundancy check, all below 7.5.</li>
-      <li><b>Joint F-statistic</b>: overall model significance.</li>
-      <li><b>Koenker (BP)</b>: tests if relationships stay consistent across space. Not significant, so GWR was not needed.</li>
+      <li><b>Moran's I</b>: checks clustering. Distance to road and elevation first showed clustering.</li>
+      <li><b>R² / Adjusted R²</b>: model fit. <b>VIF</b>: all below 7.5.</li>
+      <li><b>Joint F</b>: overall significance. <b>Koenker (BP)</b>: not significant, so GWR was not needed.</li>
     </ul>
     <h3>About this sample</h3>
-    <p>Boundaries: PSGC municipal boundaries (faeldon/philippines-json-maps). Rivers and irrigation canals: HOTOSM Philippines waterways. Roads: OpenStreetMap. Elevation: ALOS AW3D30. All were processed in QGIS. The <b>disease points, climate values and OLS numbers are placeholders</b> (OLS values from Idris et al., 2023, Johor) and must be replaced with the capstone data.</p>
+    <p>Boundaries: PSGC (faeldon/philippines-json-maps). Rivers and irrigation canals: HOTOSM waterways. Roads: OpenStreetMap. Elevation: ALOS AW3D30. Processed in QGIS. <b>Farm points, weather values and OLS numbers are placeholders</b> (OLS values from Idris et al., 2023, Johor).</p>
   </div>
 </div>
 
 <script src="js/config.js"></script>
 <script>
-// Pick the engine: Mapbox when a token exists, otherwise MapLibre (no token needed)
 (function(){
   var q=new URLSearchParams(location.search).get('mapbox'), t=window.MAPBOX_TOKEN||q||'';
   try{ if(q) localStorage.setItem('mbtoken',q); if(!t) t=localStorage.getItem('mbtoken')||''; }catch(e){}
