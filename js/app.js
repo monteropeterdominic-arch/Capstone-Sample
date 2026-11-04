@@ -102,9 +102,17 @@
     map.addLayer({ id: 'munis-line', type: 'line', source: 'munis', paint: { 'line-color': '#f3d27a', 'line-width': 0.8, 'line-opacity': 0.55, 'line-dasharray': [3, 2] } });
     map.addLayer({ id: 'prov-glow', type: 'line', source: 'prov', paint: { 'line-color': '#f3d27a', 'line-width': 10, 'line-blur': 8, 'line-opacity': 0.55 } });
     map.addLayer({ id: 'prov-line', type: 'line', source: 'prov', paint: { 'line-color': '#ffe7a3', 'line-width': 2.2 } });
-    map.addLayer({ id: 'munis-label', type: 'symbol', source: 'munis', layout: {
+    // one label per town: centroid of its largest polygon part
+    const ringArea = r => r.reduce((s, p, i) => { const q = r[(i + 1) % r.length]; return s + p[0] * q[1] - q[0] * p[1]; }, 0) / 2;
+    const ringCentroid = r => { let x = 0, y = 0, A = 0; for (let i = 0; i < r.length - 1; i++) { const [x0, y0] = r[i], [x1, y1] = r[i + 1], c = x0 * y1 - x1 * y0; A += c; x += (x0 + x1) * c; y += (y0 + y1) * c; } return [x / (3 * A), y / (3 * A)]; };
+    map.addSource('munis-pt', { type: 'geojson', data: { type: 'FeatureCollection', features: munis.features.map(f => {
+      const polys = f.geometry.type === 'Polygon' ? [f.geometry.coordinates] : f.geometry.coordinates;
+      const outer = polys.map(p => p[0]).sort((r1, r2) => Math.abs(ringArea(r2)) - Math.abs(ringArea(r1)))[0];
+      return { type: 'Feature', properties: f.properties, geometry: { type: 'Point', coordinates: ringCentroid(outer) } };
+    }) } });
+    map.addLayer({ id: 'munis-label', type: 'symbol', source: 'munis-pt', layout: {
       'text-field': ['upcase', ['get', 'adm3_en']], 'text-font': FONT,
-      'text-size': ['interpolate', ['linear'], ['zoom'], 8, 10, 12, 15], 'text-letter-spacing': 0.12, 'symbol-placement': 'point' },
+      'text-size': ['interpolate', ['linear'], ['zoom'], 8, 10, 12, 15], 'text-letter-spacing': 0.12, 'text-allow-overlap': false },
       paint: { 'text-color': '#fff2c9', 'text-halo-color': '#06101d', 'text-halo-width': 1.6 } });
 
     map.addLayer({ id: 'pts-base', type: 'circle', source: 'pts', filter: yearFilter(), paint: {
