@@ -1,6 +1,6 @@
 # Nangka Guard · North Cotabato (sample web map)
 
-A **sample** 3D web map for a capstone study on jackfruit dieback (*Erwinia carotovora*) and abiotic factors in North Cotabato (Cotabato Province). The layout follows the method of Idris et al. (2023), with a game-style HUD.
+A **sample**, kid-friendly 3D web map (pixel-game style) for a capstone study on jackfruit dieback (*Erwinia carotovora*) and abiotic factors in North Cotabato (Cotabato Province). The layout follows the method of Idris et al. (2023), with a game-style HUD.
 
 **Live map:** https://monteropeterdominic-arch.github.io/Capstone-Sample/
 
@@ -16,7 +16,7 @@ A **sample** 3D web map for a capstone study on jackfruit dieback (*Erwinia caro
 | Roads | OpenStreetMap trunk/primary/secondary/tertiary | clip to province |
 | Elevation | ALOS AW3D30 | clip, colour relief |
 | Hotspot | Kernel density of sample points, 8 km radius, weighted by frequency | heatmap, EPSG:32651 → 4326 |
-| Disease points (SAMPLE) | 64 generated points | distance to road/river/irrigation (Near), elevation sampled from DEM |
+| Farms (SAMPLE) | 64 sick + 40 healthy generated points | distance to road/river/irrigation (Near), elevation sampled from DEM |
 
 3D terrain and satellite imagery come from Mapbox.
 
@@ -29,7 +29,7 @@ Both models use maximum temperature, relative humidity, wind speed, rainfall, di
 
 ## Replacing the sample data
 
-1. **Disease points.** Export the real records from QGIS as GeoJSON in EPSG:4326 to `data/disease_points.geojson`. Keep these fields: `id, municipality, year, severity_pct, frequency, tmax_c, rh_pct, wind_ms, rain_mm, dist_road_m, dist_river_m, dist_irrig_m, elev_m`.
+1. **Disease points.** Export the real records from QGIS as GeoJSON in EPSG:4326 to `data/farms.geojson`. Keep these fields: `id, municipality, year, severity_pct, frequency, tmax_c, rh_pct, wind_ms, rain_mm, dist_road_m, dist_river_m, dist_irrig_m, elev_m`.
 2. **OLS results.** Edit `MODEL_RESULTS` in `js/config.js`.
 3. **Hotspot.** Re-run kernel density, export a PNG, and update the `OVERLAYS.hotspot` corners in `js/config.js`.
 
