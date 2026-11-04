@@ -24,6 +24,7 @@
     <button class="slot on" data-layer="roads" title="Roads"><span class="n">5</span><i>🛣️</i><em>Roads</em></button>
     <button class="slot" data-layer="elevation" title="Mountains"><span class="n">6</span><i>⛰️</i><em>Mountains</em></button>
     <button class="slot on" data-layer="munis" title="Towns"><span class="n">7</span><i>🏠</i><em>Towns</em></button>
+    <button class="slot on" data-layer="buildings" title="3D buildings (zoom in)"><span class="n">8</span><i>🏢</i><em>Buildings</em></button>
   </div>
   <div class="modes" role="tablist" aria-label="What do the trees show?">
     <button class="mode active" data-model="model1" role="tab">🤒 How sick?</button>
@@ -77,6 +78,7 @@
 <div class="camera">
   <button id="btn3d" class="slot small on" title="Tilt 3D"><i>3D</i><em>Tilt</em></button>
   <button id="btnSpin" class="slot small" title="Spin"><i>⟳</i><em>Spin</em></button>
+  <button id="btnCity" class="slot small" title="Fly to the city to see 3D buildings"><i>🏙️</i><em>City</em></button>
   <button id="btnHome" class="slot small" title="Start"><i>⌂</i><em>Start</em></button>
   <button id="btnHelp" class="slot small" title="Help"><i>?</i><em>Help</em></button>
 </div>
@@ -100,6 +102,7 @@
       <li><span>👀</span><div><b>Look at the trees.</b> Green tree = healthy. Brown bare tree = very sick.</div></li>
       <li><span>👆</span><div><b>Tap a tree</b> to see its hearts and its story.</div></li>
       <li><span>🔁</span><div><b>How often?</b> makes trees that got sick many times look bigger.</div></li>
+      <li><span>🏙️</span><div>Press <b>City</b> (bottom left) to fly in and see <b>3D buildings</b>.</div></li>
     </ol>
     <button class="btn go" id="closeWelcome">Start! ▶</button>
   </div>
@@ -125,7 +128,7 @@
       <li><b>Joint F</b>: overall significance. <b>Koenker (BP)</b>: not significant, so GWR was not needed.</li>
     </ul>
     <h3>About this sample</h3>
-    <p>Boundaries: PSGC (faeldon/philippines-json-maps). Rivers and canals: HOTOSM waterways. Roads: OpenStreetMap. Elevation: ALOS AW3D30. Processed in QGIS. <b>Farm points, weather values and OLS numbers are placeholders</b> (OLS values from Idris et al., 2023, Johor).</p>
+    <p>Boundaries: PSGC (faeldon/philippines-json-maps). Rivers and canals: HOTOSM waterways. Roads and 3D buildings: OpenStreetMap (buildings via OpenFreeMap tiles). Elevation: ALOS AW3D30. Processed in QGIS. <b>Farm points, weather values and OLS numbers are placeholders</b> (OLS values from Idris et al., 2023, Johor).</p>
   </div>
 </div>
 

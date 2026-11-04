@@ -142,6 +142,17 @@
     map.addLayer({ id: 'munis-label', type: 'symbol', source: 'munis-pt', layout: {
       'text-field': ['get', 'adm3_en'], 'text-font': FONT, 'text-size': ['interpolate', ['linear'], ['zoom'], 8, 12, 12, 17] },
       paint: { 'text-color': '#ffffff', 'text-halo-color': '#101418', 'text-halo-width': 2 } });
+    // 3D buildings (OpenStreetMap). Show from zoom 13; colours: wood houses, brick, stone
+    map.addSource('bldg', MB ? { type: 'vector', url: 'mapbox://mapbox.mapbox-streets-v8' }
+                             : { type: 'vector', url: 'https://tiles.openfreemap.org/planet' });
+    const H = MB ? ['coalesce', ['get', 'height'], 6] : ['coalesce', ['get', 'render_height'], 6];
+    const H0 = MB ? ['coalesce', ['get', 'min_height'], 0] : ['coalesce', ['get', 'render_min_height'], 0];
+    map.addLayer({ id: 'buildings', type: 'fill-extrusion', source: 'bldg', 'source-layer': 'building', minzoom: 13, paint: {
+      'fill-extrusion-color': ['step', H, '#e0b47a', 8, '#c97b5a', 15, '#9aa3b5'],
+      'fill-extrusion-height': ['interpolate', ['linear'], ['zoom'], 13, 0, 14.5, ['*', H, 1.6]],
+      'fill-extrusion-base': ['*', H0, 1.6],
+      'fill-extrusion-opacity': 0.92, 'fill-extrusion-vertical-gradient': true } });
+
     map.addLayer({ id: 'trees', type: 'symbol', source: 'farms', filter: yearFilter(), layout: {
       'icon-image': ['case', ['<=', ['get', 'severity_pct'], 0], 'tree-healthy', ['<', ['get', 'severity_pct'], 15], 'tree-little', ['<', ['get', 'severity_pct'], 28], 'tree-sick', 'tree-vsick'],
       'icon-size': sizeExpr(), 'icon-anchor': 'bottom', 'icon-allow-overlap': true, 'icon-ignore-placement': true,
@@ -158,7 +169,7 @@
   // ---------- layer slots ----------
   const LAYERS = {
     trees: ['trees'], hotspot: ['hotspot'], rivers: ['rivers', 'rivers-edge'], irrigation: ['irrigation'],
-    roads: ['roads', 'roads-edge'], elevation: ['elevation'], munis: ['munis-line', 'munis-label']
+    roads: ['roads', 'roads-edge'], elevation: ['elevation'], munis: ['munis-line', 'munis-label'], buildings: ['buildings']
   };
   document.querySelectorAll('.hotbar .slot').forEach(btn => btn.addEventListener('click', () => {
     btn.classList.toggle('on');
@@ -276,6 +287,10 @@
   bSpin.addEventListener('click', () => { state.spin = !state.spin; bSpin.classList.toggle('on', state.spin); if (state.spin) orbit(); });
   function orbit() { if (!state.spin) return; map.easeTo({ bearing: map.getBearing() + 12, duration: 1000, easing: t => t }); setTimeout(orbit, 1000); }
   map.on('mousedown', () => { if (state.spin) { state.spin = false; bSpin.classList.remove('on'); } });
+  document.getElementById('btnCity').addEventListener('click', () => {
+    if (!state.is3d) b3d.click();
+    map.flyTo({ center: [125.0893, 7.0083], zoom: 16, pitch: 65, bearing: -30, duration: 2500 });
+  });
   document.getElementById('btnHome').addEventListener('click', () => map.flyTo({ ...HOME, pitch: state.is3d ? HOME.pitch : 0, duration: 1500 }));
 
   // ---------- panel / modals ----------
