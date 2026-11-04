@@ -1,10 +1,10 @@
-# Nangka Guard · North Cotabato (sample web map)
+# Jackfruit Tree Health Map · North Cotabato (sample web map)
 
-A **sample**, kid-friendly 3D web map (pixel-game style) for a capstone study on jackfruit dieback (*Erwinia carotovora*) and abiotic factors in North Cotabato (Cotabato Province). The layout follows the method of Idris et al. (2023), with a game-style HUD.
+A **sample**, kid-friendly 3D web map (pixel-game style) for a capstone study on jackfruit dieback (*Erwinia carotovora*) and abiotic factors in North Cotabato (Cotabato Province). It follows the method of Idris et al. (2023). Each farm is a pixel tree whose look shows its health (healthy → a little sick → sick → very sick), and hearts show overall farm health.
 
 **Live map:** https://monteropeterdominic-arch.github.io/Capstone-Sample/
 
-> ⚠️ **Sample data.** The disease points, climate values and OLS numbers are placeholders. The OLS values come from Idris et al. (2023), Johor, Malaysia. Replace them with the capstone's real data before presenting.
+> ⚠️ **Sample data.** The farm points, climate values and OLS numbers are placeholders. The OLS values come from Idris et al. (2023), Johor, Malaysia. Replace them with the capstone's real data before presenting.
 
 ## What's on the map
 
@@ -18,18 +18,18 @@ A **sample**, kid-friendly 3D web map (pixel-game style) for a capstone study on
 | Hotspot | Kernel density of sample points, 8 km radius, weighted by frequency | heatmap, EPSG:32651 → 4326 |
 | Farms (SAMPLE) | 64 sick + 40 healthy generated points | distance to road/river/irrigation (Near), elevation sampled from DEM |
 
-3D terrain and satellite imagery come from Mapbox.
+3D terrain and satellite imagery come from Mapbox when a token is set, otherwise from MapLibre with AWS Terrain Tiles and Esri World Imagery. The look is an original pixel-art style inspired by sandbox games; it uses no game assets.
 
 ## Two models shown
 
-- **M1 · Severity**: % of area affected (tower height = severity)
-- **M2 · Frequency**: number of cases (tower height = cases)
+- **How sick? (Model 1, severity)**: % of area affected. The tree picture changes with severity.
+- **How often? (Model 2, frequency)**: number of cases. Trees that got sick more often are bigger and labelled ×N.
 
-Both models use maximum temperature, relative humidity, wind speed, rainfall, distance to road, distance to river, distance to irrigation, and elevation. The panel shows the coefficient direction, p-values (significant at p < 0.05), R², adjusted R², VIF, joint F and Koenker (BP).
+Both models use maximum temperature, relative humidity, wind speed, rainfall, distance to road, distance to river, distance to irrigation, and elevation. The panel explains significant factors in plain words; "For grown-ups" shows the coefficients, p-values (significant at p < 0.05), R², adjusted R², VIF, joint F and Koenker (BP).
 
 ## Replacing the sample data
 
-1. **Disease points.** Export the real records from QGIS as GeoJSON in EPSG:4326 to `data/farms.geojson`. Keep these fields: `id, municipality, year, severity_pct, frequency, tmax_c, rh_pct, wind_ms, rain_mm, dist_road_m, dist_river_m, dist_irrig_m, elev_m`.
+1. **Farms.** Export the real records from QGIS as GeoJSON in EPSG:4326 to `data/farms.geojson`. Keep these fields: `id, municipality, year, severity_pct, frequency, tmax_c, rh_pct, wind_ms, rain_mm, dist_road_m, dist_river_m, dist_irrig_m, elev_m`. Healthy farms use `severity_pct = 0`.
 2. **OLS results.** Edit `MODEL_RESULTS` in `js/config.js`.
 3. **Hotspot.** Re-run kernel density, export a PNG, and update the `OVERLAYS.hotspot` corners in `js/config.js`.
 
